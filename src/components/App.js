@@ -23,7 +23,8 @@ const initialProducts = [
   {
     id: 2,
     name: "Samsung Galaxy S23",
-    description: "Premium Android phone with Snapdragon 8 Gen 2, triple camera setup.",
+    description:
+      "Premium Android phone with Snapdragon 8 Gen 2, triple camera setup.",
     price: 799,
     image:
       "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&h=300&fit=crop",
@@ -47,70 +48,68 @@ const initialProducts = [
   },
 ];
 
-// Product List Component
-const ProductList = ({ products }) => {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800">Mobile Store</h1>
-        <nav>
-          <ul className="flex space-x-4">
-            <li>
-              <Link to="/" className="text-blue-600 hover:text-blue-800">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/admin"
-                className="text-blue-600 hover:text-blue-800 font-semibold"
-                data-testid="nav-admin"
-              >
-                Admin Panel
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </div>
+// Product List
+const ProductList = ({ products }) => (
+  <div className="container mx-auto px-4 py-8">
+    <div className="flex justify-between items-center mb-8">
+      <h1 className="text-4xl font-bold text-gray-800">Mobile Store</h1>
+      <nav>
+        <ul className="flex space-x-4">
+          <li>
+            <Link to="/" className="text-blue-600 hover:text-blue-800">
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/admin"
+              className="text-blue-600 hover:text-blue-800 font-semibold"
+              data-testid="nav-admin"
+            >
+              Admin Panel
+            </Link>
+          </li>
+        </ul>
+      </nav>
+    </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product) => (
-          <div key={product.id} className="col-12">
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  {product.name}
-                </h3>
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                  {product.description}
-                </p>
-                <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-green-600">
-                    ${product.price}
-                  </span>
-                  <Link
-                    to={`/products/${product.id}`}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200 no-underline"
-                    data-testid={`view-details-${product.id}`}
-                  >
-                    View Details
-                  </Link>
-                </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {products.map((product) => (
+        <div key={product.id} className="col-12">
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-48 object-cover"
+            />
+            <div className="p-4">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                {product.name}
+              </h3>
+              <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                {product.description}
+              </p>
+              <div className="flex justify-between items-center">
+                <span className="text-2xl font-bold text-green-600">
+                  ${product.price}
+                </span>
+                <Link
+                  to={`/products/${product.id}`}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200 no-underline"
+                  data-testid={`view-details-${product.id}`}
+                >
+                  View Details
+                </Link>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
-  );
-};
+  </div>
+);
 
-// Product Details Component
+// Product Details
 const ProductDetails = ({ products }) => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -185,7 +184,7 @@ const ProductDetails = ({ products }) => {
   );
 };
 
-// Admin Panel Component
+// Admin Panel
 const AdminPanel = ({ products, setProducts }) => {
   const navigate = useNavigate();
   const [editingProduct, setEditingProduct] = useState(null);
@@ -198,10 +197,7 @@ const AdminPanel = ({ products, setProducts }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleEditProduct = (product) => {
@@ -371,10 +367,9 @@ const AdminPanel = ({ products, setProducts }) => {
   );
 };
 
-// Main App Component
+// Main App
 const App = () => {
   const [products, setProducts] = useState(initialProducts);
-
   return (
     <Router>
       <div className="min-h-screen bg-gray-100">
