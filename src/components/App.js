@@ -87,28 +87,32 @@ const ProductList = ({ products, onProductSelect, onNavigateToAdmin }) => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {products.map((product) => (
-          <div key={product.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-            <img 
-              src={product.image} 
-              alt={product.name} 
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">{product.name}</h3>
-              <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-              <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold text-green-600">${product.price}</span>
-                <a 
-                  href={`/products/${product.id}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    console.log(`Clicking product ${product.id} - ${product.name}`);
-                    onProductSelect(product.id);
-                  }}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200 no-underline"
-                >
-                  View Details
-                </a>
+          <div key={product.id} className="col-12">
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+              <img 
+                src={product.image} 
+                alt={product.name} 
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">{product.name}</h3>
+                <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-2xl font-bold text-green-600">${product.price}</span>
+                  <div>
+                    <a 
+                      href={`/products/${product.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        console.log(`Clicking product ${product.id} - ${product.name}`);
+                        onProductSelect(product.id);
+                      }}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200 no-underline"
+                    >
+                      View Details
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -376,7 +380,7 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
+              {products.map((product, index) => (
                 <tr key={product.id} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-2">
                     <img 
@@ -437,7 +441,7 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
                   </td>
                   <td className="px-4 py-2">
                     {editingProduct === product.id ? (
-                      <>
+                      <div className="row">
                         <span>Editing...</span>
                         <button
                           onClick={handleCancelEdit}
@@ -451,9 +455,9 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
                         >
                           Save
                         </button>
-                      </>
+                      </div>
                     ) : (
-                      <>
+                      <a href="#" className="row">
                         <span>Actions</span>
                         <button
                           onClick={() => handleDeleteProduct(product.id)}
@@ -467,7 +471,7 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
                         >
                           Edit
                         </button>
-                      </>
+                      </a>
                     )}
                   </td>
                 </tr>
