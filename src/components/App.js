@@ -194,7 +194,12 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
         price: parseFloat(formData.price),
         image: formData.image
       };
-      setProducts([...products, newProduct]);
+      
+      const updatedProducts = [...products, newProduct];
+      setProducts(updatedProducts);
+      console.log(`Added new product:`, newProduct);
+      console.log(`New product count: ${updatedProducts.length}`);
+      
       setFormData({ name: '', description: '', price: '', image: '' });
     }
   };
@@ -210,7 +215,7 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
   };
 
   const handleSaveEdit = () => {
-    setProducts(products.map(product => 
+    const updatedProducts = products.map(product => 
       product.id === editingProduct 
         ? {
             ...product,
@@ -220,14 +225,32 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
             image: formData.image
           }
         : product
-    ));
+    );
+    
+    setProducts(updatedProducts);
+    const editedProduct = updatedProducts.find(p => p.id === editingProduct);
+    console.log(`Updated product ${editingProduct}:`, editedProduct);
+    
     setEditingProduct(null);
     setFormData({ name: '', description: '', price: '', image: '' });
   };
 
   const handleDeleteProduct = (productId) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      setProducts(products.filter(product => product.id !== productId));
+    const productToDelete = products.find(p => p.id === productId);
+    const confirmMessage = `Are you sure you want to delete "${productToDelete?.name}"? This action cannot be undone.`;
+    
+    if (window.confirm(confirmMessage)) {
+      console.log(`Deleting product ${productId}: ${productToDelete?.name}`);
+      const updatedProducts = products.filter(product => product.id !== productId);
+      setProducts(updatedProducts);
+      
+      // If we were editing this product, cancel the edit
+      if (editingProduct === productId) {
+        setEditingProduct(null);
+        setFormData({ name: '', description: '', price: '', image: '' });
+      }
+      
+      console.log(`Product deleted. New product count: ${updatedProducts.length}`);
     }
   };
 
@@ -424,31 +447,58 @@ const App = () => {
   const [currentView, setCurrentView] = useState('home'); // 'home', 'product', 'admin'
   const [selectedProductId, setSelectedProductId] = useState(null);
 
-  // Simulate URL changes
+  // Simulate URL changes with pushState for better navigation tracking
   useEffect(() => {
     const updateURL = () => {
       let url = '/';
+      let title = 'Mobile Store';
+      
       if (currentView === 'product' && selectedProductId) {
+        const product = products.find(p => p.id === selectedProductId);
         url = `/products/${selectedProductId}`;
+        title = product ? `${product.name} - Mobile Store` : 'Product - Mobile Store';
       } else if (currentView === 'admin') {
         url = '/admin';
+        title = 'Admin Panel - Mobile Store';
       }
-      window.history.replaceState({}, '', url);
+      
+      // Use pushState to actually change the URL in the browser
+      window.history.pushState({ view: currentView, productId: selectedProductId }, title, url);
+      document.title = title;
     };
     updateURL();
-  }, [currentView, selectedProductId]);
+  }, [currentView, selectedProductId, products]);
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state) {
+        setCurrentView(event.state.view || 'home');
+        setSelectedProductId(event.state.productId || null);
+      } else {
+        setCurrentView('home');
+        setSelectedProductId(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const handleProductSelect = (productId) => {
+    console.log(`Navigating to product ${productId} - URL will change to /products/${productId}`);
     setSelectedProductId(productId);
     setCurrentView('product');
   };
 
   const handleBackToHome = () => {
+    console.log('Navigating back to home - URL will change to /');
     setCurrentView('home');
     setSelectedProductId(null);
   };
 
   const handleNavigateToAdmin = () => {
+    console.log('Navigating to admin - URL will change to /admin');
     setCurrentView('admin');
   };
 
