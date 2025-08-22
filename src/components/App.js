@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// Initial product data - 8 products as specified
+// Initial product data
 const initialProducts = [
   {
     id: 1,
@@ -77,6 +77,7 @@ const ProductList = ({ products, onProductSelect, onNavigateToAdmin }) => {
                   onNavigateToAdmin();
                 }}
                 className="text-blue-600 hover:text-blue-800 font-semibold"
+                data-testid="nav-admin"
               >
                 Admin Panel
               </a>
@@ -104,10 +105,10 @@ const ProductList = ({ products, onProductSelect, onNavigateToAdmin }) => {
                       href={`/products/${product.id}`}
                       onClick={(e) => {
                         e.preventDefault();
-                        console.log(`Clicking product ${product.id} - ${product.name}`);
                         onProductSelect(product.id);
                       }}
                       className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200 no-underline"
+                      data-testid={`view-details-${product.id}`}
                     >
                       View Details
                     </a>
@@ -131,6 +132,7 @@ const ProductDetails = ({ product, onBack }) => {
         <button 
           onClick={onBack}
           className="btn bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600"
+          data-testid="back-to-home"
         >
           Back to Home
         </button>
@@ -143,6 +145,7 @@ const ProductDetails = ({ product, onBack }) => {
       <button 
         onClick={onBack}
         className="btn bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 mb-6"
+        data-testid="back-to-home"
       >
         ← Back to Home
       </button>
@@ -163,10 +166,10 @@ const ProductDetails = ({ product, onBack }) => {
               <span className="text-4xl font-bold text-green-600">${product.price}</span>
             </div>
             <div className="space-y-4">
-              <button className="w-full bg-green-500 text-white py-3 px-6 rounded-md hover:bg-green-600 transition-colors duration-200 font-semibold">
+              <button className="w-full bg-green-500 text-white py-3 px-6 rounded-md hover:bg-green-600 transition-colors duration-200 font-semibold" data-testid="add-to-cart">
                 Add to Cart
               </button>
-              <button className="w-full bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 transition-colors duration-200 font-semibold">
+              <button className="w-full bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 transition-colors duration-200 font-semibold" data-testid="buy-now">
                 Buy Now
               </button>
             </div>
@@ -201,9 +204,6 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
       return;
     }
     
-    console.log(`Adding new product with data:`, formData);
-    console.log(`Current product count: ${products.length}`);
-    
     const newProduct = {
       id: Math.max(...products.map(p => p.id)) + 1,
       name: formData.name.trim(),
@@ -214,19 +214,10 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
     
     const updatedProducts = [...products, newProduct];
     setProducts(updatedProducts);
-    console.log(`Added new product:`, newProduct);
-    console.log(`New product count: ${updatedProducts.length}`);
-    
     setFormData({ name: '', description: '', price: '', image: '' });
-    
-    // Verify the product was added
-    setTimeout(() => {
-      console.log(`All products after addition:`, updatedProducts.map(p => `${p.id}: ${p.name}`));
-    }, 100);
   };
 
   const handleEditProduct = (product) => {
-    console.log(`Starting edit for product:`, product);
     setEditingProduct(product.id);
     setFormData({
       name: product.name,
@@ -234,7 +225,6 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
       price: product.price.toString(),
       image: product.image
     });
-    console.log(`Edit mode activated for product ${product.id}: ${product.name}`);
   };
 
   const handleSaveEdit = () => {
@@ -242,9 +232,6 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
       alert('Please fill in all fields');
       return;
     }
-    
-    console.log(`Saving changes for product ${editingProduct}`);
-    console.log(`New data:`, formData);
     
     const updatedProducts = products.map(product => 
       product.id === editingProduct 
@@ -259,41 +246,14 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
     );
     
     setProducts(updatedProducts);
-    const editedProduct = updatedProducts.find(p => p.id === editingProduct);
-    console.log(`Updated product ${editingProduct}:`, editedProduct);
-    
     setEditingProduct(null);
     setFormData({ name: '', description: '', price: '', image: '' });
-    
-    // Force update display
-    setTimeout(() => {
-      console.log('Edit completed, form reset');
-    }, 100);
   };
 
   const handleDeleteProduct = (productId) => {
-    const productToDelete = products.find(p => p.id === productId);
-    const confirmMessage = `Are you sure you want to delete "${productToDelete?.name}"? This action cannot be undone.`;
-    
-    if (window.confirm(confirmMessage)) {
-      console.log(`Deleting product ${productId}: ${productToDelete?.name}`);
-      console.log(`Current product count: ${products.length}`);
-      
+    if (window.confirm('Are you sure you want to delete this product?')) {
       const updatedProducts = products.filter(product => product.id !== productId);
       setProducts(updatedProducts);
-      
-      // If we were editing this product, cancel the edit
-      if (editingProduct === productId) {
-        setEditingProduct(null);
-        setFormData({ name: '', description: '', price: '', image: '' });
-      }
-      
-      console.log(`Product deleted successfully. New product count: ${updatedProducts.length}`);
-      
-      // Force a re-render to update the display
-      setTimeout(() => {
-        console.log(`Products after deletion:`, updatedProducts.map(p => `${p.id}: ${p.name}`));
-      }, 100);
     }
   };
 
@@ -313,57 +273,10 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
             onBack();
           }}
           className="text-blue-600 hover:text-blue-800 font-semibold"
+          data-testid="back-to-store"
         >
           Back to Store
         </a>
-      </div>
-
-      {/* Add Product Section */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Add New Product</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="name"
-            placeholder="Product Name"
-            value={formData.name}
-            onChange={handleInputChange}
-            className="form-control border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="number"
-            name="price"
-            placeholder="Price"
-            value={formData.price}
-            onChange={handleInputChange}
-            className="form-control border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            step="0.01"
-            min="0"
-          />
-          <input
-            type="url"
-            name="image"
-            placeholder="Image URL"
-            value={formData.image}
-            onChange={handleInputChange}
-            className="form-control border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <textarea
-            name="description"
-            placeholder="Product Description"
-            value={formData.description}
-            onChange={handleInputChange}
-            className="form-control border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows="3"
-          />
-          <button 
-            onClick={handleAddProduct}
-            disabled={!formData.name || !formData.description || !formData.price || !formData.image}
-            className="button bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed md:col-span-2"
-          >
-            Add Product
-          </button>
-        </div>
       </div>
 
       {/* Products List */}
@@ -380,7 +293,7 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
               </tr>
             </thead>
             <tbody>
-              {products.map((product, index) => (
+              {products.map((product) => (
                 <tr key={product.id} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-2">
                     <img 
@@ -441,37 +354,39 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
                   </td>
                   <td className="px-4 py-2">
                     {editingProduct === product.id ? (
-                      <div className="row">
-                        <span>Editing...</span>
+                      <div>
                         <button
                           onClick={handleCancelEdit}
                           className="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 ml-2"
+                          data-testid={`cancel-edit-${product.id}`}
                         >
                           Cancel
                         </button>
                         <button
                           onClick={handleSaveEdit}
-                          className="float-right bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 ml-2"
+                          className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 ml-2"
+                          data-testid={`save-edit-${product.id}`}
                         >
                           Save
                         </button>
                       </div>
                     ) : (
-                      <a href="#" className="row">
-                        <span>Actions</span>
+                      <div>
                         <button
                           onClick={() => handleDeleteProduct(product.id)}
-                          className="float-right bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 ml-2"
+                          className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 ml-2"
+                          data-testid={`delete-btn-${product.id}`}
                         >
                           Delete
                         </button>
                         <button
                           onClick={() => handleEditProduct(product)}
-                          className="float-right bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 ml-2"
+                          className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 ml-2"
+                          data-testid={`edit-btn-${product.id}`}
                         >
                           Edit
                         </button>
-                      </a>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -484,67 +399,23 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
   );
 };
 
-// Main App Component with simulated routing
+// Main App Component
 const App = () => {
   const [products, setProducts] = useState(initialProducts);
-  const [currentView, setCurrentView] = useState('home'); // 'home', 'product', 'admin'
+  const [currentView, setCurrentView] = useState('home');
   const [selectedProductId, setSelectedProductId] = useState(null);
 
-  // Simulate URL changes with pushState for better navigation tracking
-  useEffect(() => {
-    const updateURL = () => {
-      let url = window.location.origin + '/';
-      let title = 'Mobile Store';
-      
-      if (currentView === 'product' && selectedProductId) {
-        const product = products.find(p => p.id === selectedProductId);
-        url = window.location.origin + `/products/${selectedProductId}`;
-        title = product ? `${product.name} - Mobile Store` : 'Product - Mobile Store';
-      } else if (currentView === 'admin') {
-        url = window.location.origin + '/admin';
-        title = 'Admin Panel - Mobile Store';
-      }
-      
-      // Use pushState to actually change the URL in the browser
-      if (window.location.href !== url) {
-        window.history.pushState({ view: currentView, productId: selectedProductId }, title, url);
-        document.title = title;
-        console.log(`URL updated to: ${url}`);
-      }
-    };
-    updateURL();
-  }, [currentView, selectedProductId, products]);
-
-  // Handle browser back/forward buttons
-  useEffect(() => {
-    const handlePopState = (event) => {
-      if (event.state) {
-        setCurrentView(event.state.view || 'home');
-        setSelectedProductId(event.state.productId || null);
-      } else {
-        setCurrentView('home');
-        setSelectedProductId(null);
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
   const handleProductSelect = (productId) => {
-    console.log(`Navigating to product ${productId} - URL will change to /products/${productId}`);
     setSelectedProductId(productId);
     setCurrentView('product');
   };
 
   const handleBackToHome = () => {
-    console.log('Navigating back to home - URL will change to /');
     setCurrentView('home');
     setSelectedProductId(null);
   };
 
   const handleNavigateToAdmin = () => {
-    console.log('Navigating to admin - URL will change to /admin');
     setCurrentView('admin');
   };
 
