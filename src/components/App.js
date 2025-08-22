@@ -192,25 +192,37 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
   };
 
   const handleAddProduct = () => {
-    if (formData.name && formData.description && formData.price && formData.image) {
-      const newProduct = {
-        id: Math.max(...products.map(p => p.id)) + 1,
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        image: formData.image
-      };
-      
-      const updatedProducts = [...products, newProduct];
-      setProducts(updatedProducts);
-      console.log(`Added new product:`, newProduct);
-      console.log(`New product count: ${updatedProducts.length}`);
-      
-      setFormData({ name: '', description: '', price: '', image: '' });
+    if (!formData.name || !formData.description || !formData.price || !formData.image) {
+      alert('Please fill in all fields to add a product');
+      return;
     }
+    
+    console.log(`Adding new product with data:`, formData);
+    console.log(`Current product count: ${products.length}`);
+    
+    const newProduct = {
+      id: Math.max(...products.map(p => p.id)) + 1,
+      name: formData.name.trim(),
+      description: formData.description.trim(),
+      price: parseFloat(formData.price),
+      image: formData.image.trim()
+    };
+    
+    const updatedProducts = [...products, newProduct];
+    setProducts(updatedProducts);
+    console.log(`Added new product:`, newProduct);
+    console.log(`New product count: ${updatedProducts.length}`);
+    
+    setFormData({ name: '', description: '', price: '', image: '' });
+    
+    // Verify the product was added
+    setTimeout(() => {
+      console.log(`All products after addition:`, updatedProducts.map(p => `${p.id}: ${p.name}`));
+    }, 100);
   };
 
   const handleEditProduct = (product) => {
+    console.log(`Starting edit for product:`, product);
     setEditingProduct(product.id);
     setFormData({
       name: product.name,
@@ -218,17 +230,26 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
       price: product.price.toString(),
       image: product.image
     });
+    console.log(`Edit mode activated for product ${product.id}: ${product.name}`);
   };
 
   const handleSaveEdit = () => {
+    if (!formData.name || !formData.description || !formData.price || !formData.image) {
+      alert('Please fill in all fields');
+      return;
+    }
+    
+    console.log(`Saving changes for product ${editingProduct}`);
+    console.log(`New data:`, formData);
+    
     const updatedProducts = products.map(product => 
       product.id === editingProduct 
         ? {
             ...product,
-            name: formData.name,
-            description: formData.description,
+            name: formData.name.trim(),
+            description: formData.description.trim(),
             price: parseFloat(formData.price),
-            image: formData.image
+            image: formData.image.trim()
           }
         : product
     );
@@ -239,6 +260,11 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
     
     setEditingProduct(null);
     setFormData({ name: '', description: '', price: '', image: '' });
+    
+    // Force update display
+    setTimeout(() => {
+      console.log('Edit completed, form reset');
+    }, 100);
   };
 
   const handleDeleteProduct = (productId) => {
@@ -247,6 +273,8 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
     
     if (window.confirm(confirmMessage)) {
       console.log(`Deleting product ${productId}: ${productToDelete?.name}`);
+      console.log(`Current product count: ${products.length}`);
+      
       const updatedProducts = products.filter(product => product.id !== productId);
       setProducts(updatedProducts);
       
@@ -256,7 +284,12 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
         setFormData({ name: '', description: '', price: '', image: '' });
       }
       
-      console.log(`Product deleted. New product count: ${updatedProducts.length}`);
+      console.log(`Product deleted successfully. New product count: ${updatedProducts.length}`);
+      
+      // Force a re-render to update the display
+      setTimeout(() => {
+        console.log(`Products after deletion:`, updatedProducts.map(p => `${p.id}: ${p.name}`));
+      }, 100);
     }
   };
 
@@ -403,47 +436,39 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
                     )}
                   </td>
                   <td className="px-4 py-2">
-                    <div className="flex flex-col space-y-1">
-                      {editingProduct === product.id ? (
-                        <>
-                          <div>
-                            <button
-                              onClick={handleSaveEdit}
-                              className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 mr-2"
-                            >
-                              Save
-                            </button>
-                          </div>
-                          <div>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="float-right bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div>
-                            <button
-                              onClick={() => handleEditProduct(product)}
-                              className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 mr-2"
-                            >
-                              Edit
-                            </button>
-                          </div>
-                          <div>
-                            <button
-                              onClick={() => handleDeleteProduct(product.id)}
-                              className="float-right bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                    {editingProduct === product.id ? (
+                      <>
+                        <span>Editing...</span>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 ml-2"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleSaveEdit}
+                          className="float-right bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 ml-2"
+                        >
+                          Save
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <span>Actions</span>
+                        <button
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="float-right bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 ml-2"
+                        >
+                          Delete
+                        </button>
+                        <button
+                          onClick={() => handleEditProduct(product)}
+                          className="float-right bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 ml-2"
+                        >
+                          Edit
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
