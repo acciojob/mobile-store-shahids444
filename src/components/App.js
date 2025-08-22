@@ -67,16 +67,21 @@ const ProductList = ({ products, onProductSelect, onNavigateToAdmin }) => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold text-gray-800">Mobile Store</h1>
         <nav>
-          <a 
-            href="#admin"
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigateToAdmin();
-            }}
-            className="text-blue-600 hover:text-blue-800 font-semibold"
-          >
-            Admin Panel
-          </a>
+          <ul className="flex space-x-4">
+            <li><a href="/" className="text-blue-600 hover:text-blue-800">Home</a></li>
+            <li>
+              <a 
+                href="/admin"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigateToAdmin();
+                }}
+                className="text-blue-600 hover:text-blue-800 font-semibold"
+              >
+                Admin Panel
+              </a>
+            </li>
+          </ul>
         </nav>
       </div>
       
@@ -94,12 +99,13 @@ const ProductList = ({ products, onProductSelect, onNavigateToAdmin }) => {
               <div className="flex justify-between items-center">
                 <span className="text-2xl font-bold text-green-600">${product.price}</span>
                 <a 
-                  href={`#products/${product.id}`}
+                  href={`/products/${product.id}`}
                   onClick={(e) => {
                     e.preventDefault();
+                    console.log(`Clicking product ${product.id} - ${product.name}`);
                     onProductSelect(product.id);
                   }}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200 no-underline"
                 >
                   View Details
                 </a>
@@ -400,33 +406,41 @@ const AdminPanel = ({ products, setProducts, onBack }) => {
                     <div className="flex flex-col space-y-1">
                       {editingProduct === product.id ? (
                         <>
-                          <button
-                            onClick={handleSaveEdit}
-                            className="float-right bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={handleCancelEdit}
-                            className="float-right bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600"
-                          >
-                            Cancel
-                          </button>
+                          <div>
+                            <button
+                              onClick={handleSaveEdit}
+                              className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 mr-2"
+                            >
+                              Save
+                            </button>
+                          </div>
+                          <div>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="float-right bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </>
                       ) : (
                         <>
-                          <button
-                            onClick={() => handleEditProduct(product)}
-                            className="float-right bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteProduct(product.id)}
-                            className="float-right bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-                          >
-                            Delete
-                          </button>
+                          <div>
+                            <button
+                              onClick={() => handleEditProduct(product)}
+                              className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 mr-2"
+                            >
+                              Edit
+                            </button>
+                          </div>
+                          <div>
+                            <button
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="float-right bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </>
                       )}
                     </div>
@@ -450,21 +464,24 @@ const App = () => {
   // Simulate URL changes with pushState for better navigation tracking
   useEffect(() => {
     const updateURL = () => {
-      let url = '/';
+      let url = window.location.origin + '/';
       let title = 'Mobile Store';
       
       if (currentView === 'product' && selectedProductId) {
         const product = products.find(p => p.id === selectedProductId);
-        url = `/products/${selectedProductId}`;
+        url = window.location.origin + `/products/${selectedProductId}`;
         title = product ? `${product.name} - Mobile Store` : 'Product - Mobile Store';
       } else if (currentView === 'admin') {
-        url = '/admin';
+        url = window.location.origin + '/admin';
         title = 'Admin Panel - Mobile Store';
       }
       
       // Use pushState to actually change the URL in the browser
-      window.history.pushState({ view: currentView, productId: selectedProductId }, title, url);
-      document.title = title;
+      if (window.location.href !== url) {
+        window.history.pushState({ view: currentView, productId: selectedProductId }, title, url);
+        document.title = title;
+        console.log(`URL updated to: ${url}`);
+      }
     };
     updateURL();
   }, [currentView, selectedProductId, products]);
